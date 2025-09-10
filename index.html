@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Website</title>
+  <style>
+    body {
+      background: #0f0f0f;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #1a1a1a;
+      padding: 25px;
+      border-radius: 12px;
+      max-width: 400px;
+      width: 100%;
+    }
+    h2 {
+      text-align: center;
+      color: #00eaff;
+    }
+    input[type="text"], input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #111;
+      color: #fff;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #00d26a;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 15px;
+      background: #0d330d;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    a {
+      color: #00eaff;
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      margin-top: 15px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Create Website By @Mutzxd</h2>
+
+    <form id="siteForm">
+      <label>Nama Website</label>
+      <input type="text" id="siteName" placeholder="contoh: mykerenweb">
+
+      <label>Upload File HTML</label>
+      <input type="file" id="fileInput" accept=".html" required>
+
+      <button type="submit">Buat Sekarang</button>
+    </form>
+
+    <div id="result" class="result" style="display:none;">
+      ✅ Website berhasil dibuat!<br>
+      <a id="siteLink" href="#" target="_blank"></a>
+    </div>
+
+    <div style="margin-top:20px; font-size:13px; color:#aaa;">
+      📌 <b>Syarat & Ketentuan</b><br>
+      File wajib bernama <b>index.html</b>.<br>
+      Tidak boleh mengandung konten ilegal.<br>
+      Website akan disimpan di server Vercel.
+    </div>
+
+    <div style="margin-top:15px; font-size:14px;">
+      📞 <b>Kontak Admin</b><br>
+      WhatsApp: <a href="https://wa.me/6285921018213">Owner Web</a><br>
+      Telegram: <a href="https://t.me/Mutzxd">Owner Web</a><br>
+      Channel: <a href="https://t.me/Mutzx">Channel Kami</a>
+    </div>
+
+    <div class="footer">
+      Ⓒ Create by <span style="color:#00eaff;">MUTZXD</span>
+    </div>
+  </div>
+
+  <script>
+    const VERCEL_TOKEN = "07gh15Qfvehc77FFYkY0LtLO"; // ganti dengan token kamu
+
+    function generateRandomName() {
+      return "myweb-" + Math.floor(Math.random() * 10000);
+    }
+
+    document.getElementById("siteForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      let siteName = document.getElementById("siteName").value.trim();
+
+      // kalau kosong → generate otomatis
+      if (!siteName) {
+        siteName = generateRandomName();
+      }
+
+      // sanitasi nama project
+      siteName = siteName
+        .toLowerCase()
+        .replace(/[^a-z0-9-_.]/g, "")   // hanya huruf, angka, -, _, .
+        .replace(/--+/g, "-");          // hapus double strip
+
+      if (!siteName) {
+        alert("Nama website tidak valid! Gunakan huruf kecil, angka, atau - _ .");
+        return;
+      }
+
+      const fileInput = document.getElementById("fileInput").files[0];
+      if (!fileInput) {
+        alert("Harap upload file index.html!");
+        return;
+      }
+
+      const fileContent = await fileInput.text();
+
+      const body = {
+        name: siteName,
+        files: [
+          {
+            file: "index.html",
+            data: fileContent
+          }
+        ],
+        projectSettings: {
+          framework: "static"
+        }
+      };
+
+      try {
+        const res = await fetch("https://api.vercel.com/v13/deployments", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${VERCEL_TOKEN}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+
+        const result = await res.json();
+
+        if (result.url) {
+          const link = document.getElementById("siteLink");
+          link.href = "https://" + result.url;
+          link.textContent = link.href;
+          document.getElementById("result").style.display = "block";
+        } else {
+          alert("Gagal deploy: " + JSON.stringify(result));
+        }
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
